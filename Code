@@ -1,0 +1,522 @@
+import sys
+import random
+
+from PyQt5.QtWidgets import QApplication, QWidget, QMainWindow, QLabel, QFrame, QFileDialog, QLineEdit
+from PyQt5.QtWidgets import QPushButton, QButtonGroup, QRadioButton
+from PyQt5.QtGui import QIcon, QPixmap, QPainter, QColor
+from PyQt5.QtCore import QSize, Qt, pyqtSignal, QBasicTimer
+
+DICT_EN_TO_RUS = {"Q": "Й", "W": "Ц", "E": "У", "R": "К", "T": "Е", "Y": "Н", "U": "Г", "I": "Ш",
+                  "O": "Щ", "P": "З", "{": "Х", "}": "Ъ", "|": "/", "A": "Ф", "S": "Ы", "D": "В",
+                  "F": "А", "G": "П", "H": "Р", "J": "О", "K": "Л", "L": "Д", ":": "Ж", '"': "Э",
+                  "Z": "Я", "X": "Ч", "C": "С", "V": "М", "B": "И", "N": "Т", "M": "Ь", "<": "Б",
+                  ">": "Ю", "?": ",", "@": '"', "#": "№", "$": ";", "^": ":", "&": "?",
+                  "q": "й", "w": "ц", "e": "у", "r": "к", "t": "е", "y": "н", "u": "г", "i": "ш",
+                  "o": "щ", "p": "з", "[": "х", "]": "ъ", "a": "ф", "s": "ы", "d": "в", "f": "а",
+                  "g": "п", "h": "р", "j": "о", "k": "л", "l": "д", ";": "ж", "'": "э", "z": "я",
+                  "x": "ч", "c": "с", "v": "м", "b": "и", "n": "т", "m": "ь", ",": "б", ".": "ю", "/": "."}
+
+DICT_RUS_TO_EN = {"Й": "Q", "Ц": "W", "У": "E", "К": "R", "Е": "T", "Н": "Y", "Г": "U", "Ш": "I",
+                  "Щ": "O", "З": "P", "Х": "{", "Ъ": "}", "/": "|", "Ф": "A", "Ы": "S", "В": "D",
+                  "А": "F", "П": "G", "Р": "H", "О": "J", "Л": "K", "Д": "L", "Ж": ":", "Э": '"',
+                  "Я": "Z", "Ч": "X", "С": "C", "М": "V", "И": "B", "Т": "N", "Ь": "M", "Б": "<",
+                  "Ю": ">", ",": "?", '"': "@", "№": "#", ";": "$", ":": "^", "?": "&",
+                  "й": "q", "ц": "w", "у": "e", "к": "r", "е": "t", "н": "y", "г": "u", "ш": "i",
+                  "щ": "o", "з": "p", "х": "[", "ъ": "]", "ф": "a", "ы": "s", "в": "d", "а": "f",
+                  "п": "g", "р": "h", "о": "j", "л": "k", "д": "l", "ж": ";", "э": "'", "я": "z",
+                  "ч": "x", "с": "c", "м": "v", "и": "b", "т": "n", "ь": "m", "б": ",", "ю": ".", ".": "/"}
+
+
+class FirstForm(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.initUI()
+
+    def initUI(self):
+        self.setGeometry(200, 200, 700, 700)
+        self.setWindowTitle('FORMATOP')
+
+        pixmap = QPixmap('im1.jpg')
+
+        self.label = QLabel(self)
+        self.label.setPixmap(pixmap)
+        self.label.resize(700, 700)
+
+        self.btn_word = QPushButton('', self)
+        self.btn_word.resize(100, 100)
+        self.btn_word.move(150, 150)
+        self.btn_word.setIcon(QIcon('wordfile.png'))
+        self.btn_word.setIconSize(QSize(100, 100))
+        self.label_word = QLabel('<h1 style="color: rgb(250, 250, 250);">Для</h1>', self)
+        self.label_word.move(172, 240)
+        self.label_word.resize(150, 50)
+        self.label_word2 = QLabel('<h1 style="color: rgb(250, 250, 250);">документов</h1>', self)
+        self.label_word2.move(122, 262)
+        self.label_word2.resize(200, 50)
+
+        self.btn_line = QPushButton('', self)
+        self.btn_line.resize(100, 100)
+        self.btn_line.move(450, 150)
+        self.btn_line.setIcon(QIcon('line.png'))
+        self.btn_line.setIconSize(QSize(100, 100))
+        self.label_line = QLabel('<h1 style="color: rgb(250, 250, 250);">Для</h1>', self)
+        self.label_line.move(472, 240)
+        self.label_line.resize(150, 50)
+        self.label_line2 = QLabel('<h1 style="color: rgb(250, 250, 250);">ввода</h1>', self)
+        self.label_line2.move(457, 262)
+        self.label_line2.resize(200, 50)
+
+        self.btn_game = QPushButton('', self)
+        self.btn_game.resize(180, 50)
+        self.btn_game.move(265, 520)
+        self.btn_game.setIcon(QIcon('game.png'))
+        self.btn_game.setIconSize(QSize(200, 50))
+        self.label_game = QLabel('<h1 style="color: rgb(66, 175, 255);">Мини игра</h1>', self)
+        self.label_game.move(280, 570)
+        self.label_game.resize(200, 50)
+
+        self.btn_wall = QPushButton('', self)
+        self.btn_wall.resize(50, 50)
+        self.btn_wall.move(20, 630)
+        self.btn_wall.setIcon(QIcon('wall.jpg'))
+        self.btn_wall.setIconSize(QSize(200, 50))
+
+        self.btn_wall1 = QPushButton('', self)
+        self.btn_wall1.resize(70, 70)
+        self.btn_wall1.move(20, 470)
+        self.btn_wall1.setIcon(QIcon("im1.jpg"))
+        self.btn_wall1.setIconSize(QSize(60, 60))
+        self.btn_wall1.hide()
+
+        self.btn_wall2 = QPushButton('', self)
+        self.btn_wall2.resize(70, 70)
+        self.btn_wall2.move(20, 550)
+        self.btn_wall2.setIcon(QIcon('im2.jpg'))
+        self.btn_wall2.setIconSize(QSize(60, 60))
+        self.btn_wall2.hide()
+
+        self.btn_wall3 = QPushButton('', self)
+        self.btn_wall3.resize(70, 70)
+        self.btn_wall3.move(100, 550)
+        self.btn_wall3.setIcon(QIcon('im3.jpg'))
+        self.btn_wall3.setIconSize(QSize(60, 60))
+        self.btn_wall3.hide()
+
+        self.btn_word.clicked.connect(self.open_second_form_word)
+        self.btn_line.clicked.connect(self.open_second_form_line)
+        self.btn_game.clicked.connect(self.open_second_form_game)
+
+        self.btn_wall.clicked.connect(self.open_walls)
+
+    def open_second_form_word(self):
+        self.second_form_word = SecondFormWord(self, "")
+        self.second_form_word.show()
+
+    def open_second_form_line(self):
+        self.second_form_line = SecondFormLine(self, "")
+        self.second_form_line.show()
+
+    def open_second_form_game(self):
+        self.second_form_game = SecondFormGame(self, "")
+        self.second_form_game.show()
+
+    def open_walls(self):
+        self.btn_wall1.show()
+        self.btn_wall2.show()
+        self.btn_wall3.show()
+
+        self.btn_wall1.clicked.connect(self.change_wall1)
+        self.btn_wall2.clicked.connect(self.change_wall2)
+        self.btn_wall3.clicked.connect(self.change_wall3)
+
+    def change_wall1(self):
+        pixmap = QPixmap('im1.jpg')
+        self.label.setPixmap(pixmap)
+        self.label.resize(700, 700)
+        self.btn_wall1.hide()
+        self.btn_wall2.hide()
+        self.btn_wall3.hide()
+
+    def change_wall2(self):
+        pixmap = QPixmap('im2.jpg')
+        self.label.setPixmap(pixmap)
+        self.label.resize(700, 700)
+        self.btn_wall1.hide()
+        self.btn_wall2.hide()
+        self.btn_wall3.hide()
+
+    def change_wall3(self):
+        pixmap = QPixmap('im3.jpg')
+        self.label.setPixmap(pixmap)
+        self.label.resize(700, 700)
+        self.btn_wall1.hide()
+        self.btn_wall2.hide()
+        self.btn_wall3.hide()
+
+
+class SecondFormWord(QWidget):
+    def __init__(self, *args):
+        super().__init__()
+        self.initUI(args)
+
+    def initUI(self, args):
+        self.setGeometry(200, 200, 700, 700)
+        self.setWindowTitle('FORMATOP')
+        pixmap = QPixmap('котя.jpg')
+        self.label = QLabel(self)
+        self.label.setPixmap(pixmap)
+        self.label.resize(700, 700)
+
+        self.language = 'EN'
+
+        self.ready = QLabel('<h1 style="color: rgb(255, 25, 25);">Файл сохранен</h1>', self)
+        self.ready.move(195, 500)
+        self.ready.resize(250, 150)
+        self.ready.hide()
+
+        self.unsupported_file = QLabel('<h1 style="color: rgb(255, 25, 25);">Файл не читается</h1>', self)
+        self.unsupported_file.move(195, 500)
+        self.unsupported_file.resize(250, 150)
+        self.unsupported_file.hide()
+
+        self.lbl = QLabel(args[-1], self)
+        self.lbl.adjustSize()
+        self.btn = QPushButton('Выбрать файл', self)
+        self.btn.resize(100, 100)
+        self.btn.move(150, 150)
+        self.btn.clicked.connect(self.choose_file)
+
+        self.label_choose_language = QLabel('Вид деформации: En -> Рус', self)
+        self.label_choose_language.move(150, 300)
+        self.label_choose_language.resize(250, 50)
+        self.button_en_to_rus = QRadioButton('En -> Рус', self)
+        self.button_en_to_rus.setChecked(True)
+        self.button_en_to_rus.move(150, 350)
+        self.button_rus_to_en = QRadioButton('Рус -> En', self)
+        self.button_rus_to_en.move(150, 400)
+        self.button_group = QButtonGroup()
+        self.button_group.addButton(self.button_en_to_rus)
+        self.button_group.addButton(self.button_rus_to_en)
+        self.button_group.buttonClicked.connect(self.choose_language)
+
+    def choose_file(self):
+        self.unsupported_file.hide()
+        try:
+            fname = QFileDialog.getOpenFileName(self, 'Выбрать файл', '', 'Файл (*.txt);;Файл (*.doc);;Файл (*.docx)')[
+                0]
+            f = open(fname, encoding="utf-8").read()
+            dict = {}
+            if self.language == 'EN':
+                dict = DICT_EN_TO_RUS
+            elif self.language == 'РУС':
+                dict = DICT_RUS_TO_EN
+            translate = ''
+            keys = list(dict.keys())
+            list_f = list(f)
+            for i in list_f:
+                if i in keys:
+                    translate += dict[i]
+                else:
+                    translate += i
+            f = open(fname, 'w')
+            f.write(translate)
+            f.close()
+            self.ready.show()
+        except Exception:
+            self.ready.hide()
+            self.unsupported_file.show()
+
+    def choose_language(self, button):
+        self.label_choose_language.setText('Вид деформации: ' + button.text())
+        if button.text()[-1] == 'с':
+            self.language = 'EN'
+        elif button.text()[-1] == 'n':
+            self.language = 'РУС'
+        self.ready.hide()
+        self.unsupported_file.hide()
+
+
+class SecondFormLine(QWidget):
+    def __init__(self, *args):
+        super().__init__()
+        self.initUI(args)
+
+    def initUI(self, args):
+        self.setGeometry(200, 200, 700, 700)
+        self.setWindowTitle('FORMATOP')
+        pixmap = QPixmap('catty.jpg')
+        self.label = QLabel(self)
+        self.label.setPixmap(pixmap)
+        self.label.resize(700, 700)
+
+        self.language = 'EN'
+
+        self.ready = QLabel('<h1 style="color: rgb(255, 25, 25);">Готово</h1>', self)
+        self.ready.move(400, 500)
+        self.ready.resize(250, 150)
+        self.ready.hide()
+
+        self.line_text = QLabel(self)
+        self.line_text.setText("Введите текст: ")
+        self.line_text.move(40, 90)
+        self.write_text = QLineEdit(self)
+        self.write_text.move(130, 90)
+        self.write_text.resize(465, 70)
+
+        self.lbl = QLabel(args[-1], self)
+        self.lbl.adjustSize()
+        self.btn = QPushButton('ОК', self)
+        self.btn.resize(70, 70)
+        self.btn.move(600, 90)
+        self.btn.clicked.connect(self.translate)
+
+        self.label_choose_language = QLabel('Вид деформации: En -> Рус', self)
+        self.label_choose_language.move(450, 250)
+        self.label_choose_language.resize(250, 50)
+        self.button_en_to_rus = QRadioButton('En -> Рус', self)
+        self.button_en_to_rus.setChecked(True)
+        self.button_en_to_rus.move(450, 300)
+        self.button_rus_to_en = QRadioButton('Рус -> En', self)
+        self.button_rus_to_en.move(450, 350)
+        self.button_group = QButtonGroup()
+        self.button_group.addButton(self.button_en_to_rus)
+        self.button_group.addButton(self.button_rus_to_en)
+        self.button_group.buttonClicked.connect(self.choose_language)
+
+    def translate(self):
+        text = self.write_text.text()
+        if self.language == 'EN':
+            dict = DICT_EN_TO_RUS
+        elif self.language == 'РУС':
+            dict = DICT_RUS_TO_EN
+        translate = ''
+        keys = list(dict.keys())
+        for i in text:
+            if i in keys:
+                translate += dict[i]
+            else:
+                translate += i
+        self.write_text.setText(translate)
+        self.ready.show()
+
+    def choose_language(self, button):
+        self.label_choose_language.setText('Вид деформации: ' + button.text())
+        if button.text()[-1] == 'с':
+            self.language = 'EN'
+        elif button.text()[-1] == 'n':
+            self.language = 'РУС'
+        self.ready.hide()
+
+
+class SecondFormGame(QWidget):
+    def __init__(self, *args):
+        super().__init__()
+        self.initUI(args)
+
+    def initUI(self, args):
+        self.setGeometry(200, 200, 700, 700)
+        self.setWindowTitle('FORMATOP')
+        self.setStyleSheet("background-color : blue;")
+
+        self.btn_play = QPushButton('PLAY', self)
+        self.btn_play.resize(100, 100)
+        self.btn_play.move(300, 450)
+        self.btn_play.setStyleSheet("background-color : yellow;")
+
+        self.st1 = QLabel('<h1 style="color: rgb(240, 240, 25);">Мини игра "Змейка"</h1>', self)
+        self.st1.move(210, 0)
+        self.st1.resize(300, 50)
+
+        self.st2 = QLabel('<h1 style="color: rgb(255, 255, 255);">Правила:</h1>', self)
+        self.st2.move(20, 50)
+        self.st2.resize(130, 50)
+        self.st3 = QLabel('<h1 style="color: rgb(255, 255, 255);">Вы управляете змеей с помощью компьютерных</h1>',
+                          self)
+        self.st3.move(20, 100)
+        self.st3.resize(700, 50)
+        self.st4 = QLabel('<h1 style="color: rgb(255, 255, 255);">клавиш .Удачи вам. Ваша цель набрать как</h1>', self)
+        self.st4.move(20, 150)
+        self.st4.resize(700, 50)
+
+        pixmap = QPixmap('клавиши.png')
+        self.label = QLabel(self)
+        self.label.setPixmap(pixmap)
+        self.label.move(135, 138)
+
+        self.st5 = QLabel('<h1 style="color: rgb(255, 255, 255);">можно больше очков, вырасти, добегая до еды,</h1>',
+                          self)
+        self.st5.move(20, 250)
+        self.st5.resize(700, 50)
+        self.st6 = QLabel('<h1 style="color: rgb(255, 255, 255);">но будьте осторожны, не забегайте на тело змеи.</h1>',
+                          self)
+        self.st6.move(20, 300)
+        self.st6.resize(700, 50)
+        self.st7 = QLabel('<h1 style="color: rgb(255, 255, 255);">Если вы "укусите" себя, то проиграете.</h1>', self)
+        self.st7.move(20, 350)
+        self.st7.resize(700, 50)
+
+        self.st_play = QLabel('<h1 style="color: rgb(200, 200, 80);">Нажмите "PLAY", чтобы начать игру</h1>', self)
+        self.st_play.move(115, 550)
+        self.st_play.resize(700, 50)
+
+        self.btn_play.clicked.connect(self.open_game)
+
+    def open_game(self):
+        self.window_game = Window()
+        self.window_game.show()
+
+
+class Window(QMainWindow):
+    def __init__(self):
+        super(Window, self).__init__()
+        self.setWindowTitle('Мини игра "Змейка"')
+        self.setGeometry(200, 200, 700, 700)
+        self.setStyleSheet("background-color : green;")
+
+        self.board = Board(self)
+
+        self.result = self.statusBar()
+        self.result.setStyleSheet("border : 2px solid red;")
+
+        self.board.statusbar[str].connect(self.result.showMessage)
+
+        self.setCentralWidget(self.board)
+        self.board.start()
+        self.show()
+
+
+class Board(QFrame):
+    statusbar = pyqtSignal(str)
+    SPEED = 80
+    WIDTH_BLOCKS = 60
+    HEIGHT_BLOCKS = 40
+
+    def __init__(self, parent):
+        super(Board, self).__init__(parent)
+
+        self.timer = QBasicTimer()
+        self.snake = [[5, 10], [5, 11]]
+        self.x_head = self.snake[0][0]
+        self.y_head = self.snake[0][1]
+
+        self.food = []
+        self.grow_snake = False
+        self.board = []
+        self.direction = 1
+        self.drop_food()
+
+        self.setFocusPolicy(Qt.StrongFocus)
+
+    def square_width(self):
+        return self.contentsRect().width() / Board.WIDTH_BLOCKS
+
+    def square_height(self):
+        return self.contentsRect().height() / Board.HEIGHT_BLOCKS
+
+    def start(self):
+        self.statusbar.emit(str(len(self.snake) - 2))
+        self.timer.start(Board.SPEED, self)
+
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        rect = self.contentsRect()
+        boardtop = rect.bottom() - Board.HEIGHT_BLOCKS * self.square_height()
+
+        for dot in self.snake:
+            self.draw_square(painter, rect.left() + dot[0] * self.square_width(),
+                             boardtop + dot[1] * self.square_height())
+
+        for dot in self.food:
+            self.draw_square(painter, rect.left() + dot[0] * self.square_width(),
+                             boardtop + dot[1] * self.square_height())
+
+    def draw_square(self, painter, x, y):
+        color = QColor(0x7CFC00)
+        painter.fillRect(x + 1, y + 1, self.square_width() - 2,
+                         self.square_height() - 2, color)
+
+    def keyPressEvent(self, event):
+        key = event.key()
+
+        if key == Qt.Key_Left:
+            if self.direction != 2:
+                self.direction = 1
+
+        elif key == Qt.Key_Right:
+            if self.direction != 1:
+                self.direction = 2
+
+        elif key == Qt.Key_Down:
+            if self.direction != 4:
+                self.direction = 3
+
+        elif key == Qt.Key_Up:
+            if self.direction != 3:
+                self.direction = 4
+
+    def move_snake(self):
+        if self.direction == 1:
+            self.x_head, self.y_head = self.x_head - 1, self.y_head
+            if self.x_head < 0:
+                self.x_head = Board.WIDTH_BLOCKS - 1
+
+        if self.direction == 2:
+            self.x_head, self.y_head = self.x_head + 1, self.y_head
+            if self.x_head == Board.WIDTH_BLOCKS:
+                self.x_head = 0
+
+        if self.direction == 3:
+            self.x_head, self.y_head = self.x_head, self.y_head + 1
+            if self.y_head == Board.HEIGHT_BLOCKS:
+                self.y_head = 0
+
+        if self.direction == 4:
+            self.x_head, self.y_head = self.x_head, self.y_head - 1
+            if self.y_head < 0:
+                self.y_head = Board.HEIGHT_BLOCKS
+
+        head = [self.x_head, self.y_head]
+        self.snake.insert(0, head)
+        if not self.grow_snake:
+            self.snake.pop()
+
+        else:
+            self.statusbar.emit(str(len(self.snake) - 2))
+            self.grow_snake = False
+
+    def eat_food(self):
+        for pos in self.food:
+            if pos == self.snake[0]:
+                self.food.remove(pos)
+                self.drop_food()
+                self.grow_snake = True
+
+    def drop_food(self):
+        x_food = random.randint(3, 58)
+        y_food = random.randint(3, 38)
+        for pos in self.snake:
+            if pos == [x_food, y_food]:
+                self.drop_food()
+        self.food.append([x_food, y_food])
+
+    def end_game(self):
+        for i in range(1, len(self.snake)):
+            if self.snake[i] == self.snake[0]:
+                self.statusbar.emit(str("Game over"))
+                self.setStyleSheet("background-color : black;")
+                self.timer.stop()
+                self.update()
+
+    def timerEvent(self, event):
+        if event.timerId() == self.timer.timerId():
+            self.move_snake()
+            self.eat_food()
+            self.end_game()
+            self.update()
+
+
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = FirstForm()
+    ex.show()
+    sys.exit(app.exec())
